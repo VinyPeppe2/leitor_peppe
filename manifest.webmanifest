@@ -1,0 +1,24 @@
+{
+  "id": "./",
+  "name": "Leitor QR - Peppe",
+  "short_name": "Leitor QR Peppe",
+  "description": "Leitor e gerador de QR Codes, códigos de barras, boletos e Pix, com voz que guia a leitura.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0a1220",
+  "theme_color": "#101827",
+  "categories": ["utilities", "productivity", "shopping"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Ler código", "short_name": "Ler", "url": "./?action=read", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Gerar código", "short_name": "Gerar", "url": "./?action=generate", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Montar Pix", "short_name": "Pix", "url": "./?action=pix", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

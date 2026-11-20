@@ -1,0 +1,18 @@
+{
+  "name": "leitor-qr-peppe",
+  "version": "5.4.0",
+  "private": true,
+  "description": "Leitor e gerador de QR Codes, códigos de barras, boletos e Pix, com verificação anti-golpe e voz que guia a leitura.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "test": "node tests/core.test.js",
+    "test:ui": "node tests/ui.smoke.test.js",
+    "test:pdf": "node tests/report.test.js",
+    "test:all": "node tests/core.test.js && node tests/report.test.js && node tests/ui.smoke.test.js",
+    "serve": "npx --yes http-server -p 8080 -c-1 ."
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0",
+    "jspdf": "2.5.1"
+  }
+}

@@ -1,0 +1,29 @@
+# Dependências e builds
+node_modules/
+package-lock.json.bak
+dist/
+build/
+coverage/
+
+# Segredos e configuração local (nunca publique)
+.env
+.env.*
+*.pem
+*.key
+
+# Sistema e editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*~
+
+# Logs, temporários e pacotes gerados
+*.log
+npm-debug.log*
+*.tmp
+*.zip
+tests/shots/
+tests/out/

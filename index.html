@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
+<meta name="description" content="Leitor QR - Peppe: leia e gere QR Codes, códigos de barras, boletos e Pix. Com voz que guia a leitura.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="style.css">
+<title>Leitor QR - Peppe</title>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="brand">
+    <div class="logo" aria-hidden="true">⌗</div>
+    <div><h1>Leitor QR - Peppe</h1><p class="sub" data-i18n="tagline"></p></div>
+  </div>
+  <div class="top-actions">
+    <select id="language" class="small" data-i18n-label="language"><option value="pt">PT-BR</option><option value="en">EN</option><option value="es">ES</option></select>
+    <button id="installBtn" class="small" data-i18n="install"></button>
+    <button id="themeBtn" class="small" data-i18n="theme"></button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab" data-page="read" aria-selected="true" data-i18n="tab_read"></button>
+  <button class="tab" data-page="generate" aria-selected="false" data-i18n="tab_generate"></button>
+  <button class="tab" data-page="pix" aria-selected="false" data-i18n="tab_pix"></button>
+  <button class="tab" data-page="stats" aria-selected="false" data-i18n="tab_stats"></button>
+  <button class="tab" data-page="batch" aria-selected="false" data-i18n="tab_batch"></button>
+  <button class="tab" data-page="library" aria-selected="false" data-i18n="tab_library"></button>
+  <button class="tab" data-page="settings" aria-selected="false" data-i18n="tab_settings"></button>
+</nav>
+
+<!-- ===== LER ===== -->
+<section id="page-read" class="page"><div class="layout">
+  <div class="panel">
+    <h2 data-i18n="readerTitle"></h2>
+    <div class="tabs">
+      <button id="cameraTab" class="tab" aria-selected="true" data-i18n="camTab"></button>
+      <button id="imageTab" class="tab" aria-selected="false" data-i18n="imgTab"></button>
+    </div>
+
+    <div id="cameraMode">
+      <div class="scan-opts">
+        <select id="scanMode" data-i18n-label="mode_label">
+          <option value="all" data-i18n="mode_all"></option>
+          <option value="qr" data-i18n="mode_qr"></option>
+          <option value="barcode" data-i18n="mode_bar"></option>
+        </select>
+        <label class="check"><input type="checkbox" id="batchToggle"><b data-i18n="batch_mode"></b></label>
+        <label class="check"><input type="checkbox" id="continuousToggle"><span data-i18n="continuous"></span></label>
+        <button id="voiceBtn" class="small" aria-pressed="true"></button>
+      </div>
+      <div class="cam-wrap" id="camWrap"><div id="reader"></div><canvas id="guide" class="guide" aria-hidden="true"></canvas></div>
+      <p id="cameraStatus" class="status" aria-live="polite"></p>
+      <div id="batchBar" class="batch-bar hidden"><div class="bb-text"><b id="batchBarCount"></b><div id="batchBarLast" class="hint"></div></div><button id="batchOpen" class="small primary" data-i18n="batch_open"></button></div>
+      <div id="zoomWrap" class="zoom hidden"><span data-i18n="zoom"></span><input type="range" id="zoomRange" min="1" max="4" step="0.1" value="1" aria-label="Zoom"></div>
+      <div class="actions">
+        <button class="primary" id="startBtn" data-i18n="startBtn"></button>
+        <button id="stopBtn" disabled data-i18n="stopBtn"></button>
+        <button id="torchBtn" disabled data-i18n="torch"></button>
+        <button id="switchBtn" class="hidden" data-i18n="switchCam"></button>
+      </div>
+    </div>
+
+    <div id="imageMode" class="hidden">
+      <div class="empty" id="dropZone">
+        <div style="font-size:34px" aria-hidden="true">▧</div>
+        <b data-i18n="img_title"></b>
+        <p class="muted" data-i18n="img_desc"></p>
+        <label class="file-label primary" for="imageInput" data-i18n="img_choose"></label>
+        <input id="imageInput" type="file" accept="image/*">
+        <p class="hint" data-i18n="img_hint"></p>
+      </div>
+      <div class="actions"><button id="pasteBtn" data-i18n="paste_btn"></button></div>
+      <p id="fileStatus" class="status" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <div class="panel" id="resultPanel">
+    <h2 data-i18n="resultTitle"></h2>
+    <div class="empty" id="empty" data-i18n="empty_result"></div>
+    <div class="result" id="result">
+      <div id="autoBar" class="auto-bar hidden"><span id="autoTxt"></span><button id="autoCancel" data-i18n="cancel"></button></div>
+      <div id="verdict" class="verdict hidden" role="alert"></div>
+      <span class="type" id="resultType"></span>
+      <pre class="payload" id="resultText"></pre>
+      <div id="editBox" class="hidden"><textarea id="editText" data-i18n-label="edit_label" rows="4"></textarea><div class="actions"><button class="primary" id="editApply" data-i18n="edit_apply"></button><button id="editCancel" data-i18n="edit_cancel"></button></div></div>
+      <div id="infoBox"></div>
+      <div id="productInfo"></div>
+      <div class="actions">
+        <button class="primary" id="copyBtn" data-i18n="copy"></button>
+        <button id="saveCodeBtn"></button>
+        <button id="openBtn" disabled data-i18n="open"></button>
+        <button id="searchBtn" data-i18n="search"></button>
+        <button id="shareBtn" data-i18n="share"></button>
+        <button id="editBtn" data-i18n="edit_btn"></button>
+        <button id="toGenBtn" data-i18n="to_gen_btn"></button>
+        <button id="lookupBtn" class="hidden"></button>
+        <span id="extraActions" style="display:contents"></span>
+      </div>
+      <p class="hint" id="openHint"></p>
+    </div>
+    <div class="history">
+      <div class="history-head"><h2 style="margin:0" data-i18n="history"></h2><button class="small" id="clearHistory" data-i18n="clear"></button></div>
+      <div id="historyList" class="history-list"></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ===== GERAR ===== -->
+<section id="page-generate" class="page hidden"><div class="layout">
+  <div class="panel">
+    <h2 data-i18n="gen_title"></h2>
+    <div class="field"><label for="genType" data-i18n="gen_type"></label>
+      <select id="genType">
+        <option value="qr" data-i18n="gen_type_qr"></option>
+        <option value="CODE128">Code 128</option>
+        <option value="EAN13">EAN-13</option>
+        <option value="EAN8">EAN-8</option>
+        <option value="UPC">UPC-A</option>
+        <option value="CODE39">Code 39</option>
+        <option value="ITF">ITF (2 de 5)</option>
+      </select>
+    </div>
+    <div class="field"><label for="qrText" data-i18n="gen_content"></label><textarea id="qrText" data-i18n-ph="gen_content_ph"></textarea><span class="hint hidden" id="bcHint"></span></div>
+
+    <div id="qrOpts">
+      <div class="field-row">
+        <div class="field"><label for="qrSize" data-i18n="size"></label><select id="qrSize"><option value="180">180 px</option><option value="256" selected>256 px</option><option value="360">360 px</option><option value="512">512 px</option></select></div>
+        <div class="field"><label for="qrLevel" data-i18n="ecc"></label><select id="qrLevel"><option value="L" data-i18n="ecc_L"></option><option value="M" selected data-i18n="ecc_M"></option><option value="Q" data-i18n="ecc_Q"></option><option value="H" data-i18n="ecc_H"></option></select></div>
+      </div>
+    </div>
+    <div id="bcOpts" class="field-row hidden">
+      <div class="field"><label for="bcWidth" data-i18n="bc_width"></label><select id="bcWidth"><option value="1">1×</option><option value="2" selected>2×</option><option value="3">3×</option><option value="4">4×</option></select></div>
+      <div class="field"><label for="bcHeight" data-i18n="bc_height"></label><select id="bcHeight"><option value="60">60</option><option value="100" selected>100</option><option value="140">140</option><option value="200">200</option></select></div>
+    </div>
+    <label class="check hidden" id="bcTextWrap"><input type="checkbox" id="bcText" checked><span data-i18n="bc_text"></span></label>
+
+    <div class="color-row">
+      <div class="field"><label for="qrDark" data-i18n="color_dark"></label><input type="color" id="qrDark" value="#111827"></div>
+      <div class="field"><label for="qrLight" data-i18n="color_light"></label><input type="color" id="qrLight" value="#ffffff"></div>
+    </div>
+    <div class="field" id="logoField"><label for="logoInput" data-i18n="logo_label"></label><label class="file-label" for="logoInput" data-i18n="logo_choose"></label><input id="logoInput" type="file" accept="image/*"><span class="hint" id="logoName"></span></div>
+    <button id="makeQr" class="primary" data-i18n="make"></button>
+    <p class="hint" data-i18n="gen_hint"></p>
+  </div>
+  <div class="panel">
+    <h2 data-i18n="preview_title"></h2>
+    <div id="qrOutput" class="qr-preview"><span style="color:#526078" data-i18n="preview_empty"></span></div>
+    <div class="actions"><button id="downloadQr" disabled data-i18n="download"></button><button id="copyQr" disabled data-i18n="copy_img"></button></div>
+  </div>
+</div></section>
+
+<!-- ===== PIX ===== -->
+<section id="page-pix" class="page hidden"><div class="layout">
+  <div class="panel">
+    <h2 data-i18n="pix_title"></h2>
+    <p class="hint" data-i18n="pix_intro"></p>
+    <div class="field"><label for="pixKey" data-i18n="pix_key_label"></label><input id="pixKey" type="text" autocomplete="off" data-i18n-ph="pix_key_ph"><span class="hint" id="pixKeyHint"></span></div>
+    <div class="field-row">
+      <div class="field"><label for="pixName" data-i18n="pix_name_label"></label><input id="pixName" type="text" maxlength="25" placeholder="NOME"></div>
+      <div class="field"><label for="pixCity" data-i18n="pix_city_label"></label><input id="pixCity" type="text" maxlength="15" placeholder="SAO PAULO"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label for="pixAmount" data-i18n="pix_amount_label"></label><input id="pixAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="25,90"></div>
+      <div class="field"><label for="pixTxid" data-i18n="pix_txid_label"></label><input id="pixTxid" type="text" maxlength="25" value="***"></div>
+    </div>
+    <button id="makePix" class="primary" data-i18n="pix_make"></button>
+    <p class="hint" data-i18n="pix_confirm_hint"></p>
+  </div>
+  <div class="panel">
+    <h2 data-i18n="pix_out_title"></h2>
+    <div id="pixOutput" class="qr-preview"><span style="color:#526078" data-i18n="pix_out_empty"></span></div>
+    <div class="actions"><button id="copyPix" disabled data-i18n="pix_copy"></button><button id="downloadPix" disabled data-i18n="pix_download"></button></div>
+    <pre id="pixPayload" class="payload hidden" style="margin-top:12px"></pre>
+  </div>
+</div></section>
+
+<!-- ===== LOTE ===== -->
+<section id="page-batch" class="page hidden"><div class="panel">
+  <div class="history-head"><h2 style="margin:0" data-i18n="batch_title"></h2></div>
+  <p class="hint" data-i18n="batch_hint"></p>
+  <div class="field-row">
+    <div class="field"><label for="batchName" data-i18n="batch_name"></label><input id="batchName" type="text" maxlength="60" data-i18n-ph="batch_name_ph"></div>
+    <div class="field"><label for="batchFilter" data-i18n="batch_filter"></label><select id="batchFilter"><option value="all" data-i18n="f_all"></option><option value="alerts" data-i18n="f_alerts"></option><option value="pay" data-i18n="f_pay"></option><option value="products" data-i18n="f_products"></option></select></div>
+  </div>
+  <div id="batchStats" class="stats batch-stats"></div>
+  <div id="batchWarnings"></div>
+  <details id="invBox" class="inv">
+    <summary data-i18n="inv_title"></summary>
+    <p class="hint" data-i18n="inv_hint"></p>
+    <div class="field"><label for="invText" data-i18n="inv_paste"></label><textarea id="invText" rows="5" spellcheck="false" placeholder="7891000100103;10;Leite integral 1L&#10;SKU-778;2;Parafuso sextavado"></textarea></div>
+    <div class="actions">
+      <button class="primary" id="invApply" data-i18n="inv_apply"></button>
+      <label class="file-label" for="invFile" data-i18n="inv_import"></label><input id="invFile" type="file" accept=".csv,.txt,text/csv,text/plain">
+      <button id="invTemplate" data-i18n="inv_template"></button>
+      <button id="invClear" class="danger" data-i18n="inv_clear"></button>
+    </div>
+    <p id="invStatus" class="hint" aria-live="polite"></p>
+    <div id="invStats" class="stats batch-stats"></div>
+    <label class="check" style="margin-top:10px"><input type="checkbox" id="invShowOk"><span data-i18n="inv_show_ok"></span></label>
+    <div id="invList" class="history-list"></div>
+    <div class="actions"><button id="invCsv" data-i18n="inv_csv"></button></div>
+  </details>
+  <div class="actions">
+    <button class="primary" id="batchPdf" data-i18n="batch_pdf"></button>
+    <button id="batchPdfShare" class="hidden" data-i18n="batch_pdf_share"></button>
+    <button id="batchContinue" data-i18n="batch_continue"></button>
+    <button id="batchCsv" data-i18n="batch_csv"></button>
+    <button id="batchJson" data-i18n="batch_json"></button>
+    <button id="batchCopy" data-i18n="batch_copy"></button>
+    <button id="batchShare" data-i18n="batch_share"></button>
+    <button id="batchSave" data-i18n="batch_save"></button>
+    <button id="batchClear" class="danger" data-i18n="batch_clear"></button>
+  </div>
+  <div class="field"><label for="batchSearch" data-i18n="batch_search"></label><input id="batchSearch" type="text"></div>
+  <div id="batchList" class="history-list"></div>
+</div></section>
+
+<!-- ===== BIBLIOTECA ===== -->
+<section id="page-library" class="page hidden"><div class="panel">
+  <div class="history-head">
+    <h2 style="margin:0" data-i18n="lib_title"></h2>
+    <div class="actions" style="margin:0">
+      <button class="small" id="libExport" data-i18n="lib_export"></button>
+      <label class="file-label small" for="libImport" data-i18n="lib_import"></label><input id="libImport" type="file" accept="application/json,.json">
+      <button class="small" id="clearLibrary" data-i18n="lib_clear"></button>
+    </div>
+  </div>
+  <p class="hint" data-i18n="lib_hint"></p>
+  <div class="field"><label for="librarySearch" data-i18n="lib_search"></label><input id="librarySearch" type="text" data-i18n-ph="lib_search_ph"></div>
+  <div id="libraryList" class="history-list"></div>
+</div></section>
+
+<!-- ===== ESTATÍSTICAS ===== -->
+<section id="page-stats" class="page hidden"><div class="panel">
+  <div class="history-head"><h2 style="margin:0" data-i18n="stats_title"></h2><button id="exportCsv" class="primary" data-i18n="export_csv"></button></div>
+  <p class="hint" data-i18n="stats_hint"></p>
+  <div class="stats" style="margin-top:16px">
+    <div class="stat"><b id="totalStat">0</b><span data-i18n="stat_total"></span></div>
+    <div class="stat"><b id="qrStat">0</b><span data-i18n="stat_qr"></span></div>
+    <div class="stat"><b id="barStat">0</b><span data-i18n="stat_bar"></span></div>
+    <div class="stat"><b id="linkStat">0</b><span data-i18n="stat_links"></span></div>
+  </div>
+  <div class="history" style="margin-top:20px"><h2 data-i18n="by_format"></h2><div id="formatBars" class="bars"></div></div>
+  <div class="history" style="margin-top:20px"><h2 data-i18n="recent"></h2><div id="statsRecent" class="history-list"></div></div>
+</div></section>
+
+<!-- ===== AJUSTES ===== -->
+<section id="page-settings" class="page hidden"><div class="panel">
+  <h2 data-i18n="set_title"></h2>
+  <div class="set-list">
+    <div class="set-item">
+      <label class="check"><input type="checkbox" id="setVoice"><b data-i18n="set_voice"></b></label>
+      <p class="hint" data-i18n="set_voice_desc"></p>
+      <div class="row">
+        <label for="setVoicePick" class="muted" data-i18n="set_voice_pick"></label>
+        <select id="setVoicePick"></select>
+      </div>
+      <div class="row">
+        <label for="setRate" class="muted" data-i18n="set_rate"></label>
+        <input type="range" id="setRate" min="0.7" max="1.3" step="0.05" value="1"><span id="rateVal">1.0×</span>
+        <button id="testVoice" class="small" data-i18n="set_test"></button>
+      </div>
+      <p class="hint" id="voiceUsing"></p>
+      <p class="hint" data-i18n="set_voice_note"></p>
+    </div>
+    <div class="set-item">
+      <label class="check"><input type="checkbox" id="setBeep"><span data-i18n="set_beep"></span></label><br>
+      <label class="check" style="margin-top:8px"><input type="checkbox" id="setVibrate"><span data-i18n="set_vibrate"></span></label>
+    </div>
+    <div class="set-item">
+      <label class="check"><input type="checkbox" id="setAutoOpen"><span data-i18n="set_autoopen"></span></label>
+      <p class="hint" data-i18n="set_autoopen_warn"></p>
+      <label class="check" style="margin-top:10px"><input type="checkbox" id="setAutoLookup"><span data-i18n="set_autolookup"></span></label>
+    </div>
+    <div class="set-item">
+      <label class="check"><input type="checkbox" id="setGuide"><span data-i18n="set_guide"></span></label>
+      <p class="hint" data-i18n="set_guide_desc"></p>
+    </div>
+    <div class="set-item">
+      <h3 data-i18n="inst_title"></h3>
+      <p class="hint" data-i18n="inst_desc"></p>
+      <div class="row"><button id="installBtn2" class="primary" data-i18n="install"></button></div>
+      <p class="hint" id="installHelp"></p>
+    </div>
+    <div class="set-item">
+      <h3 data-i18n="set_bank"></h3>
+      <p class="hint" data-i18n="set_bank_desc"></p>
+      <div class="row"><select id="setBank" data-i18n-label="set_bank"></select></div>
+    </div>
+    <div class="set-item">
+      <h3 data-i18n="set_data"></h3>
+      <button id="clearAll" class="small danger" data-i18n="set_clear_all"></button>
+    </div>
+  </div>
+</div></section>
+
+<p class="footer" data-i18n="footer"></p>
+</div>
+<div id="imgHost" aria-hidden="true"></div>
+<div id="toast" class="toast" role="status"></div>
+
+<script src="core.js"></script>
+<script src="report.js"></script>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
